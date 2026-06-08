@@ -1,6 +1,7 @@
 package com.fteodoro.webmonitor.controller;
 
 import com.fteodoro.webmonitor.dto.CreateEndpointRequest;
+import com.fteodoro.webmonitor.dto.EndpointResponse;
 import com.fteodoro.webmonitor.model.MonitoredEndpoint;
 import com.fteodoro.webmonitor.service.MonitoredEndpointService;
 import java.net.URI;
@@ -24,21 +25,29 @@ public class MonitoredEndpointController {
     }
 
     @PostMapping
-    public ResponseEntity<Void> create(@RequestBody CreateEndpointRequest dto) {
+    public ResponseEntity<EndpointResponse> create(
+        @RequestBody CreateEndpointRequest dto
+    ) {
         MonitoredEndpoint monitoredEndpoint = service.create(dto);
         var uri = URI.create("/endpoints/" + monitoredEndpoint.getId());
-        return ResponseEntity.created(uri).build();
+        return ResponseEntity.created(uri).body(
+            EndpointResponse.from(monitoredEndpoint)
+        );
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<MonitoredEndpoint> getById(@PathVariable Long id) {
+    public ResponseEntity<EndpointResponse> getById(@PathVariable Long id) {
         var monitoredEndpoint = service.findById(id);
-        return ResponseEntity.ok(monitoredEndpoint);
+        return ResponseEntity.ok(EndpointResponse.from(monitoredEndpoint));
     }
 
     @GetMapping
-    public ResponseEntity<List<MonitoredEndpoint>> getAll() {
-        var monitoredEndpoints = service.findAll();
+    public ResponseEntity<List<EndpointResponse>> getAll() {
+        var monitoredEndpoints = service
+            .findAll()
+            .stream()
+            .map(EndpointResponse::from)
+            .toList();
         return ResponseEntity.ok(monitoredEndpoints);
     }
 }
