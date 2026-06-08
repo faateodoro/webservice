@@ -1,12 +1,12 @@
 package com.fteodoro.webmonitor.model;
 
 import jakarta.persistence.*;
-import org.hibernate.annotations.CreationTimestamp;
-
 import java.time.LocalDateTime;
+import org.hibernate.annotations.CreationTimestamp;
 
 @Entity
 public class MonitoredEndpoint {
+
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
@@ -26,15 +26,18 @@ public class MonitoredEndpoint {
     @CreationTimestamp
     private LocalDateTime createdAt;
 
-    public MonitoredEndpoint(String name, String url, int checkIntervalSeconds) {
+    public MonitoredEndpoint(
+        String name,
+        String url,
+        int checkIntervalSeconds
+    ) {
         this.name = name;
         this.url = url;
         this.checkIntervalSeconds = checkIntervalSeconds;
         this.isActive = true;
     }
 
-    protected MonitoredEndpoint() {
-    }
+    protected MonitoredEndpoint() {}
 
     public Long getId() {
         return id;
