@@ -2,13 +2,20 @@ package com.fteodoro.webmonitor.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrowsExactly;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.Mockito.lenient;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import com.fteodoro.webmonitor.dto.CreateEndpointRequest;
 import com.fteodoro.webmonitor.exception.ResourceNotFoundException;
 import com.fteodoro.webmonitor.model.MonitoredEndpoint;
 import com.fteodoro.webmonitor.repository.MonitoredEndpointRepository;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -62,5 +69,65 @@ public class MonitoredEndpointServiceTest {
         );
 
         assertEquals(expectedMessage, exception.getMessage());
+    }
+
+    @Test
+    @DisplayName("findAll Should return all registered endpoints")
+    void findAll_shouldReturnAllRegisteredEndpoints() {
+        var firstEndpoint = new MonitoredEndpoint(
+            "Um endpoint interessante",
+            "interestingurl.com",
+            90
+        );
+        var secondEndpoint = new MonitoredEndpoint(
+            "Um endpoint comum",
+            "commonurl.com",
+            120
+        );
+        var endpoints = new ArrayList<MonitoredEndpoint>();
+        endpoints.add(firstEndpoint);
+        endpoints.add(secondEndpoint);
+
+        when(repository.findAll()).thenReturn(endpoints);
+
+        List<MonitoredEndpoint> listEndpoints = service.findAll();
+
+        assertEquals(2, listEndpoints.size());
+        verify(repository).findAll();
+    }
+
+    @Test
+    @DisplayName(
+        "findAll Should return an empty list when there is no register"
+    )
+    void findAll_shouldReturnAnEmptyListWhenThereIsNoRegister() {
+        List<MonitoredEndpoint> endpoints = Collections.emptyList();
+
+        when(repository.findAll()).thenReturn(endpoints);
+
+        List<MonitoredEndpoint> listEndpoints = service.findAll();
+
+        assertTrue(listEndpoints.isEmpty());
+    }
+
+    @Test
+    @DisplayName("create Should return save created endpoint")
+    void create_shouldReturnSaveCreatedEndpoint() {
+        var dto = new CreateEndpointRequest(
+            "Um endpoint interessante",
+            "interestingurl.com",
+            90
+        );
+
+        when(repository.save(any(MonitoredEndpoint.class))).thenAnswer(
+            invocation -> invocation.getArgument(0, MonitoredEndpoint.class)
+        );
+
+        var endpoint = service.create(dto);
+
+        assertEquals(dto.name(), endpoint.getName());
+        assertEquals(dto.url(), endpoint.getUrl());
+        assertEquals(dto.interval(), endpoint.getCheckIntervalSeconds());
+        verify(repository).save(any(MonitoredEndpoint.class));
     }
 }
