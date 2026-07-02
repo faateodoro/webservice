@@ -31,6 +31,10 @@ public class MonitoredEndpointService {
         return monitoredEndpointRepository.findAll();
     }
 
+    public List<MonitoredEndpoint> findAllActive() {
+        return monitoredEndpointRepository.findByIsActiveTrue();
+    }
+
     public MonitoredEndpoint findById(Long id) {
         return monitoredEndpointRepository
             .findById(id)

@@ -23,7 +23,8 @@ public class MonitoringScheduler {
 
     @Scheduled(fixedDelay = 30000)
     public void scheduleChecking() {
-        List<MonitoredEndpoint> endpoints = monitoredEndpointService.findAll();
+        List<MonitoredEndpoint> endpoints =
+            monitoredEndpointService.findAllActive();
         endpoints.forEach(endpointCheckerService::check);
     }
 }
