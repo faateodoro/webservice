@@ -7,5 +7,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
 public interface CheckResultRepository
     extends JpaRepository<CheckResult, Long>
 {
-    List<CheckResult> findByMonitoredEndpoint_IdOrderByVerifiedAtDesc(Long id);
+    List<CheckResult> findByMonitoredEndpoint_IdOrderByVerifiedAtDesc(long id);
 }

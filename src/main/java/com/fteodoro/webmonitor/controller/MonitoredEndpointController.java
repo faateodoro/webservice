@@ -1,8 +1,12 @@
 package com.fteodoro.webmonitor.controller;
 
+import static org.springframework.http.ResponseEntity.ok;
+
+import com.fteodoro.webmonitor.dto.CheckResultResponse;
 import com.fteodoro.webmonitor.dto.CreateEndpointRequest;
 import com.fteodoro.webmonitor.dto.EndpointResponse;
 import com.fteodoro.webmonitor.model.MonitoredEndpoint;
+import com.fteodoro.webmonitor.service.CheckResultService;
 import com.fteodoro.webmonitor.service.MonitoredEndpointService;
 import java.net.URI;
 import java.util.List;
@@ -18,17 +22,24 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/endpoints")
 public class MonitoredEndpointController {
 
-    private final MonitoredEndpointService service;
+    private final MonitoredEndpointService monitoredEndpointService;
+    private final CheckResultService checkResultService;
 
-    public MonitoredEndpointController(MonitoredEndpointService service) {
-        this.service = service;
+    public MonitoredEndpointController(
+        MonitoredEndpointService monitoredEndpointService,
+        CheckResultService checkResultService
+    ) {
+        this.monitoredEndpointService = monitoredEndpointService;
+        this.checkResultService = checkResultService;
     }
 
     @PostMapping
     public ResponseEntity<EndpointResponse> create(
         @RequestBody CreateEndpointRequest dto
     ) {
-        MonitoredEndpoint monitoredEndpoint = service.create(dto);
+        MonitoredEndpoint monitoredEndpoint = monitoredEndpointService.create(
+            dto
+        );
         var uri = URI.create("/endpoints/" + monitoredEndpoint.getId());
         return ResponseEntity.created(uri).body(
             EndpointResponse.from(monitoredEndpoint)
@@ -37,17 +48,29 @@ public class MonitoredEndpointController {
 
     @GetMapping("/{id}")
     public ResponseEntity<EndpointResponse> getById(@PathVariable Long id) {
-        var monitoredEndpoint = service.findById(id);
-        return ResponseEntity.ok(EndpointResponse.from(monitoredEndpoint));
+        var monitoredEndpoint = monitoredEndpointService.findById(id);
+        return ok(EndpointResponse.from(monitoredEndpoint));
     }
 
     @GetMapping
     public ResponseEntity<List<EndpointResponse>> getAll() {
-        var monitoredEndpoints = service
+        var monitoredEndpoints = monitoredEndpointService
             .findAll()
             .stream()
             .map(EndpointResponse::from)
             .toList();
-        return ResponseEntity.ok(monitoredEndpoints);
+        return ok(monitoredEndpoints);
+    }
+
+    @GetMapping("/{id}/checks")
+    public ResponseEntity<List<CheckResultResponse>> getByMonitoredEndpoint(
+        @PathVariable long id
+    ) {
+        List<CheckResultResponse> responses = checkResultService
+            .findByEndpointId(id)
+            .stream()
+            .map(CheckResultResponse::from)
+            .toList();
+        return ok(responses);
     }
 }
