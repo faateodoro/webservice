@@ -1,10 +1,8 @@
 package com.fteodoro.webmonitor.service;
 
-import static org.junit.jupiter.api.Assertions.assertDoesNotThrow;
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyLong;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
@@ -49,19 +47,20 @@ public class CheckResultServiceTest {
         list.add(result2);
         list.add(result3);
 
+        when(monitoredEndpointService.findById(anyLong())).thenReturn(endpoint);
         when(repository.findByMonitoredEndpoint_IdOrderByVerifiedAtDesc(anyLong())).thenReturn(list);
 
         var results = service.findByEndpointId(42L);
 
         assertEquals(3, results.size());
         verify(repository).findByMonitoredEndpoint_IdOrderByVerifiedAtDesc(42L);
-
     }
 
     @Test
     @DisplayName("findByEndpointId Endpoint does not exists should throws ResourceNotFoundException")
     void findByEndpointId_endpointDoesNotExistsShouldThrowsResourceNotFoundException() {
-        when(service.findByEndpointId(anyLong())).thenThrow(ResourceNotFoundException.class);
+        when(monitoredEndpointService.findById(anyLong()))
+            .thenThrow(new ResourceNotFoundException("Not found"));
 
         assertThrows(ResourceNotFoundException.class, () -> service.findByEndpointId(anyLong()));
         verifyNoMoreInteractions(repository);
@@ -70,11 +69,11 @@ public class CheckResultServiceTest {
     @Test
     @DisplayName("findByEndpointId Endpoint exists should return empty list")
     void findByEndpointId_endpointExistsShouldReturnEmptyList() {
-        when(monitoredEndpointService.findById(anyLong())).thenReturn(any(MonitoredEndpoint.class));
+        var endpoint = new MonitoredEndpoint("Meu site", "https://fteodoro.dev", 60);
+        when(monitoredEndpointService.findById(anyLong())).thenReturn(endpoint);
 
         var results = service.findByEndpointId(15L);
 
         assertTrue(results.isEmpty());
-        assertDoesNotThrow(() -> ResourceNotFoundException.class);
     }
 }
