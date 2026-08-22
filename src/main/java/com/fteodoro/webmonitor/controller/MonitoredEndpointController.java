@@ -8,6 +8,9 @@ import com.fteodoro.webmonitor.dto.EndpointResponse;
 import com.fteodoro.webmonitor.model.MonitoredEndpoint;
 import com.fteodoro.webmonitor.service.CheckResultService;
 import com.fteodoro.webmonitor.service.MonitoredEndpointService;
+
+import jakarta.validation.Valid;
+
 import java.net.URI;
 import java.util.List;
 import org.springframework.http.ResponseEntity;
@@ -35,7 +38,7 @@ public class MonitoredEndpointController {
 
     @PostMapping
     public ResponseEntity<EndpointResponse> create(
-        @RequestBody CreateEndpointRequest dto
+        @RequestBody @Valid CreateEndpointRequest dto
     ) {
         MonitoredEndpoint monitoredEndpoint = monitoredEndpointService.create(
             dto
